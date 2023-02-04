@@ -1,0 +1,41 @@
+#Versión de Docker Compose
+version: "3.9"
+#Definimos los servicios: app y mongodb
+services:
+  #Indicamos la ruta en la cual se encuentra nuestro archivo Dockerfile
+  app:
+    restart: always
+    # Indicamos que el servicio se genera a partir del Dockerfile que se encuentra en esta misma ruta
+    build: .
+    #Asignamos puertos para el servicio
+    ports:
+      - "3000:3000"
+    links:
+      - mongodb
+    volumes:
+      # Vinculamos la ruta local con la ruta del contenedor para reflejar los cambios realizados durante el desarrollo de la aplicación
+      - .:/usr/src/app
+    env_file:
+      - .env.dev
+  mongodb:
+    #Definimos la imagen a partir de la cual se genera el servicio mongodb
+    image: mongo
+    #Asignamos puertos para el servicio
+    ports:
+      - "27017:27017"
+    #Definimos las variables de entorno
+    env_file:
+      - .env.dev
+
+    command: mongod --quiet --logpath /dev/null.
+
+    #Asignamos el volume donde se guardarán los datos y pasamos la ruta donde mongo guarda los datos.
+    #Rutas para otros tipo de bases de datos:
+    # mysql -> /var/lib/mysql
+    # postgres -> /var/lib/postgresql/data
+    volumes:
+      - mongo-data:/data/db
+
+#Indicamos el volume disponible para el contenedor
+volumes:
+  mongo-data:
