@@ -4,6 +4,7 @@ const config = require("./config");
 const notFound = require("./middleware/notFound");
 const handlerError = require("./middleware/handlerError");
 const { default: helmet } = require("helmet");
+require("./database");
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 
 //ROUTES
 app.use("/api/user", require("./routes/userRouter"));
+app.use("/api/video", require("./routes/videoRouter"));
 
 //HANDLER ERRORS
 app.use(notFound);

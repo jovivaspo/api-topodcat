@@ -12,6 +12,7 @@ const config = {
   PORT: process.env.PORT,
   MONGO_INITDB_ROOT_USERNAME: process.env.MONGO_INITDB_ROOT_USERNAME,
   MONGO_INITDB_ROOT_PASSWORD: process.env.MONGO_INITDB_ROOT_PASSWORD,
+  KEY_SECRET: process.env.KEY_SECRET,
 };
 
 module.exports = config;
