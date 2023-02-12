@@ -1,8 +1,7 @@
-const jwt = require("jsonwebtoken");
-const config = require("../config");
-const Users = require("../models/Users");
+const Users = require("../models/User");
+const verifyToken = require("../services/verifyToken");
 
-const protect = (req, res, next) => {
+const protect = async (req, res, next) => {
   try {
     const authorization = req.get("Authorization");
 
@@ -12,21 +11,21 @@ const protect = (req, res, next) => {
       token = authorization.substring(7);
     }
 
-    jwt.verify(token, config.KEY_SECRET, async (error, decodedToken) => {
-      if (error) {
-        res.status(401);
-        const error = new Error(error.name);
-        return next(error);
-      }
-      const user = await Users.findOne({ email: decodedToken.email });
-      if (!user) {
-        res.status(401);
-        const error = new Error("Permiso denegado");
-        return next(error);
-      }
-      next();
-    });
+    const check = verifyToken(token);
+
+    if (check.error) {
+      res.status(401);
+      return next(check.error);
+    }
+    const user = await Users.findOne({ email: check.decodedToken.email });
+    if (!user) {
+      res.status(401);
+      const error = new Error("Permiso denegado");
+      return next(error);
+    }
+    next();
   } catch (error) {
+    console.log(error);
     res.status(401);
     return next(error);
   }

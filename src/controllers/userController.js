@@ -1,7 +1,15 @@
+const PodcastInfo = require("../models/PodcastInfo");
 const User = require("../models/User");
 const createToken = require("../services/createToken");
 
+const connection = require("../database");
+const mongoose = require("mongoose");
+
 const userController = {};
+
+const gridFsBucket = new mongoose.mongo.GridFSBucket(mongoose.connection, {
+  bucketName: "podcasts",
+});
 
 userController.test = async (req, res, next) => {
   return res.status(200).json({ message: "Testeando" });
@@ -42,8 +50,6 @@ userController.register = async (req, res, next) => {
     await newUser.save();
 
     const token = createToken(newUser.id, newUser.email);
-
-    console.log(token);
 
     res.status(201).json({
       message: "Register succesfully",
@@ -105,12 +111,33 @@ userController.getUser = async (req, res, next) => {
 userController.deleteUser = async (req, res, next) => {
   try {
     const id = req.params.id;
-    const user = await User.findByIdAndDelete(id);
+    const user = await User.findById(id);
+
     if (!user) {
       res.status(404);
       const error = new Error("User not found");
       return next(error);
     }
+
+    if (user.podcastsList.length > 0) {
+      const listPodcasts = user.podcastsList;
+
+      const podcastsId = await Promise.all(
+        listPodcasts.map(async (id) => {
+          return await PodcastInfo.findByIdAndDelete(id);
+        })
+      );
+
+      const podcasts = await Promise.all(
+        podcastsId.map(async (podcast) => {
+          const _id = podcast.podcastId;
+          return await gridFsBucket.delete(_id);
+        })
+      );
+    }
+
+    await User.findByIdAndDelete(id);
+
     return res.status(202).json({ message: "User deleted" });
   } catch (error) {
     console.log(error);
