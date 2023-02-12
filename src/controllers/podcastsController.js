@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const connection = require("../database");
 const User = require("../models/User");
 const PodcastInfo = require("../models/PodcastInfo");
 
