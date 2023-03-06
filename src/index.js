@@ -2,10 +2,8 @@ const app = require("./app");
 const http = require("http");
 const { Server } = require("socket.io");
 const server = http.createServer(app);
-const convertVideo = require("./services/convertVideo");
 
 const User = require("./models/User");
-const verifyToken = require("./services/verifyToken");
 const getAudio = require("./services/getAudio");
 
 //CREATE SOCKETS///
@@ -15,7 +13,7 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-
+/*
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
   if (token) {
@@ -23,9 +21,6 @@ io.use((socket, next) => {
     if (res.error) return next(new Error(res.error));
     socket.decoded = res.decodedToken;
     next();
-  } else {
-    console.log("No existe token");
-    next(new Error("Error de autenticación"));
   }
 });
 
@@ -40,17 +35,14 @@ io.use(async (socket, next) => {
   let totalTime = parseInt(duration);
   list.forEach((el) => {
     totalTime += parseInt(el.duration);
-    console.log(totalTime);
   });
+  console.log(totalTime);
   if (totalTime > process.env.LIMIT_TIME) {
-    console.log("Espacio insuficiente", totalTime);
-    next(new Error("Espacio insuficiente, borre algún podcast"));
-  } else {
-    console.log("Espacio ocupado:", totalTime);
-    next();
+    return next(new Error("Espacio insuficiente, borre algún podcast"));
   }
+  next();
 }).on("connection", (socket) => {
-  console.log("connected to socket.io user,: ", socket.decoded);
+  console.log("Usuario conectado: ", socket.decoded.email);
 
   socket.emit("message_converting", "Convirtiendo video...");
 
@@ -62,7 +54,7 @@ io.use(async (socket, next) => {
     console.log("Usuario desconectado");
   });
 });
-
+*/
 server.listen(app.get("port"), () => {
   console.log(`Server on port ${app.get("port")}`);
 });
