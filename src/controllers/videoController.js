@@ -7,7 +7,7 @@ videoController.searchVideos = async (req, res, next) => {
     const search = req.params.search;
 
     if (!search) {
-      const error = new Error("Bad request");
+      const error = new Error("Petición incorrecta");
       res.status(403);
       return next(error);
     }
@@ -15,7 +15,7 @@ videoController.searchVideos = async (req, res, next) => {
     const results = await youtube.search(search);
 
     if (!results || results.length === 0) {
-      const error = new Error("Error searching for video");
+      const error = new Error("Error en la búsqueda...");
       res.status(500);
       return next(error);
     }

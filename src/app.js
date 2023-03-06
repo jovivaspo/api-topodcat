@@ -30,7 +30,7 @@ app.use(express.json());
 //ROUTES
 //app.use("/api/user", require("./routes/userRouter"));
 app.use("/api/auth", require("./routes/authRouter"));
-//app.use("/api/video", require("./routes/videoRouter"));
+app.use("/api/video", require("./routes/videoRouter"));
 //app.use("/api/podcasts", require("./routes/podRouter"));
 
 //HANDLER ERRORS

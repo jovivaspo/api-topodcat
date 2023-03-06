@@ -3,6 +3,6 @@ const videoController = require("../controllers/videoController");
 
 const router = Router();
 
-router.get("/search/:search", videoController.searchVideos);
+router.get("/:search", videoController.searchVideos);
 
 module.exports = router;
