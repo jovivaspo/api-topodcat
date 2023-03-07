@@ -3,9 +3,29 @@ const createToken = require("../services/createToken");
 
 const authController = {};
 
+const regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
 authController.register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      const error = new Error("Petición incorrecta");
+      res.status(400);
+      return next(error);
+    }
+
+    if (!regexEmail.test(email)) {
+      const error = new Error("Email no válido");
+      res.status(400);
+      return next(error);
+    }
+
+    if (password.length < 6) {
+      const error = new Error("Contraseña debe tener al menos 6 caracteres");
+      res.status(400);
+      return next(error);
+    }
 
     const user = await User.findOne({ email });
 
@@ -30,6 +50,7 @@ authController.register = async (req, res, next) => {
     res.status(201).json({
       message: "Usuario registrado",
       email: newUser.email,
+      name: newUser.name,
       uid: newUser.id,
       token,
     });
@@ -41,6 +62,12 @@ authController.register = async (req, res, next) => {
 authController.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      const error = new Error("Petición incorrecta");
+      res.status(400);
+      return next(error);
+    }
 
     const user = await User.findOne({ email });
 
@@ -60,6 +87,7 @@ authController.login = async (req, res, next) => {
     res.status(200).json({
       message: "Inicio de sesión",
       email: user.email,
+      name: user.name,
       uid: user.id,
       token,
     });

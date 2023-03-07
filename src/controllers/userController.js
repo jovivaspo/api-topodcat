@@ -77,7 +77,7 @@ userController.deleteUser = async (req, res, next) => {
 
     await User.findByIdAndDelete(id);
 
-    return res.status(202).json({ message: "User deleted" });
+    return res.status(202).json({ message: "Usuario borrado" });
   } catch (error) {
     console.log(error);
     return error;

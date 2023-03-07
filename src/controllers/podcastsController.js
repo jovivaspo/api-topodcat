@@ -78,7 +78,15 @@ podController.deletePodcastByIdInfo = async (req, res, next) => {
   try {
     const id = req.params.idPodInfo;
     const infoDeleted = await PodcastInfo.findByIdAndDelete(id);
+    if (!infoDeleted) {
+      const error = new Error("Error al eliminar...");
+      return next(error);
+    }
     const { uid, podcastId } = infoDeleted;
+    if (!uid || !podcastId) {
+      const error = new Error("Error al eliminar...");
+      return next(error);
+    }
     await gridFsBucket.delete(podcastId);
 
     const user = await User.findById(uid);
@@ -86,8 +94,8 @@ podController.deletePodcastByIdInfo = async (req, res, next) => {
     await user.save();
     return res.status(201).json({ message: "Podcast borrado" });
   } catch (err) {
-    console.log(err);
-    next(err);
+    const error = new Error("Error al eliminar...");
+    next(error);
   }
 };
 
@@ -106,12 +114,15 @@ podController.downloadPodcasts = async (req, res, next) => {
   try {
     const id = new mongoose.mongo.ObjectId(req.params.id);
 
-    console.log("Descargando: ", id);
-
     res.set("content-type", "audio/mp3");
     res.set("accept-ranges", "bytes");
 
     let downloadStream = gridFsBucket.openDownloadStream(id);
+
+    downloadStream.on("error", (err) => {
+      const error = new Error("Error al iniciar descarga");
+      next(error);
+    });
 
     downloadStream.pipe(res);
   } catch (err) {
