@@ -1,6 +1,5 @@
 const PodcastInfo = require("../models/PodcastInfo");
 const User = require("../models/User");
-const createToken = require("../services/createToken");
 
 const connection = require("../database");
 const mongoose = require("mongoose");
@@ -19,7 +18,7 @@ userController.getAll = async (req, res, next) => {
   try {
     const users = await User.find();
     if (users.length === 0) {
-      return res.status(200).json({ user: "Not users yet" });
+      return res.status(200).json({ user: "No hay usuarios registrados" });
     }
     return res.status(200).json({ users });
   } catch (error) {
@@ -33,10 +32,15 @@ userController.getUser = async (req, res, next) => {
     const user = await User.findById(id);
     if (!user) {
       res.status(404);
-      const error = new Error("User not found");
+      const error = new Error("Usuario no encontrado");
       return next(error);
     }
-    return res.status(200).json(user);
+    return res.status(200).json({
+      name: user.name,
+      uid: user.id,
+      email: user.email,
+      podcastsList: user.podcastsList,
+    });
   } catch (error) {
     console.log(error);
     return error;
@@ -50,7 +54,7 @@ userController.deleteUser = async (req, res, next) => {
 
     if (!user) {
       res.status(404);
-      const error = new Error("User not found");
+      const error = new Error("Usuario no encontrado");
       return next(error);
     }
 

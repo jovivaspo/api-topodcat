@@ -2,7 +2,7 @@ const { Schema, model, models } = require("mongoose");
 
 const PodcastInfoSchema = new Schema({
   title: { type: String, required: true },
-  userId: { type: Schema.Types.ObjectId, ref: "Users" },
+  uid: { type: Schema.Types.ObjectId, ref: "Users" },
   podcastId: { type: Schema.Types.ObjectId, required: true },
   img: { type: String },
   duration: { type: String },

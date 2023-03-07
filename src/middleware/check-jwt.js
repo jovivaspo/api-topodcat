@@ -7,19 +7,24 @@ const checkJWT = async (req, res, next) => {
   let token = "";
 
   if (!authorization || !authorization.toLowerCase().startsWith("bearer")) {
-    return res.status(401).json({ message: "No hay token en la petición" });
+    return res.status(401).json({ error: "No hay token en la petición" });
   }
 
   token = authorization.substring(7);
 
   try {
     const { uid, name } = jwt.verify(token, config.KEY_SECRET);
+    if (!uid || !name) {
+      return res.status(401).json({ error: "Token no válido" });
+    }
+
     req.uid = uid;
     req.name = name;
+
     next();
   } catch (error) {
     console.log(error);
-    res.status(401).json({ message: "Token no válido" });
+    return res.status(401).json({ error: "Token no válido" });
   }
 };
 

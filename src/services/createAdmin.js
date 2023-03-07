@@ -10,6 +10,7 @@ const createAdmin = async () => {
         name: config.ADMIN_NAME,
         email: config.ADMIN_EMAIL,
         password: config.ADMIN_PASSWORD,
+        role: "admin",
       });
 
       newAdmin.password = await newAdmin.encryptPassword(newAdmin.password);

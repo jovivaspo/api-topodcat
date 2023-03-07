@@ -8,7 +8,6 @@ const User = require("../models/User");
 
 const getAudio = async (video, socket) => {
   try {
-    console.log("Vamos a convertir el video");
     const gridFsBucket = new mongoose.mongo.GridFSBucket(connection, {
       bucketName: "podcasts",
     });
@@ -33,13 +32,13 @@ const getAudio = async (video, socket) => {
       })
       .pipe(uploadStream, { end: true })
       .on("error", () => {
-        return socket.emit("error", "Error subiendo archivo  el archivo");
+        return socket.emit("error", "Error subiendo el archivo");
       })
       .on("finish", async () => {
         console.log("Archivo subido con éxito id:", idPodcast);
         const podcastInfo = new PodcastInfo({
           title: video.title,
-          userId: socket.decoded.id,
+          uid: socket.uid,
           podcastId: idPodcast,
           img: video.thumbnail,
           duration: video.duration,
@@ -47,7 +46,7 @@ const getAudio = async (video, socket) => {
         });
         const podcastInfoSaved = await podcastInfo.save();
 
-        const user = await User.findById(socket.decoded.id);
+        const user = await User.findById(socket.uid);
 
         user.podcastsList = user.podcastsList.concat(podcastInfoSaved.id);
 

@@ -9,26 +9,40 @@ const gridFsBucket = new mongoose.mongo.GridFSBucket(mongoose.connection, {
 });
 
 podController.getAllPodcasts = async (req, res, next) => {
-  const podcasts = await gridFsBucket.find({}).toArray();
-  return res.status(200).json(podcasts);
+  try {
+    const podcasts = await gridFsBucket.find({}).toArray();
+    return res.status(200).json(podcasts);
+  } catch (err) {
+    console.log(err);
+    const error = new Error("Algo salió mal");
+    next(error);
+  }
 };
 
 podController.info = async (req, res, next) => {
-  const info = await PodcastInfo.find();
-  return res.status(200).json(info);
+  try {
+    const info = await PodcastInfo.find();
+    return res.status(200).json(info);
+  } catch (err) {
+    console.log(err);
+    const error = new Error("Algo salió mal");
+    next(error);
+  }
 };
 
 podController.getAll = async (req, res, next) => {
   try {
-    const userId = req.params.userId;
+    const uid = req.params.uid;
 
-    const user = await User.findById(userId).populate("podcastsList");
+    const user = await User.findById(uid).populate("podcastsList");
 
     const list = user.podcastsList;
 
     res.status(200).json(list);
   } catch (err) {
-    next(err);
+    console.log(err);
+    const error = new Error("No se pudo recuperar su lista");
+    next(error);
   }
 };
 
@@ -59,14 +73,15 @@ podController.getPodcast = async (req, res, next) => {
   }
 };
 
+//Esta es la que usa la app
 podController.deletePodcastByIdInfo = async (req, res, next) => {
   try {
     const id = req.params.idPodInfo;
     const infoDeleted = await PodcastInfo.findByIdAndDelete(id);
-    const { userId, podcastId } = infoDeleted;
+    const { uid, podcastId } = infoDeleted;
     await gridFsBucket.delete(podcastId);
 
-    const user = await User.findById(userId);
+    const user = await User.findById(uid);
     user.podcastsList = user.podcastsList.filter((el) => el.toString() !== id);
     await user.save();
     return res.status(201).json({ message: "Podcast borrado" });
@@ -100,7 +115,8 @@ podController.downloadPodcasts = async (req, res, next) => {
 
     downloadStream.pipe(res);
   } catch (err) {
-    next(err);
+    const error = new Error("Error al iniciar descarga");
+    next(error);
   }
 };
 

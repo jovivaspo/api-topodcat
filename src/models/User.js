@@ -5,6 +5,7 @@ const UserSchema = new Schema({
   name: { type: String, required: true },
   email: { type: String, required: [true, "Email required"], unique: true },
   password: { type: String, required: [true, "Password required"] },
+  role: { type: String, enum: ["user", "admin"], default: "user" },
   podcastsList: [{ type: Schema.Types.ObjectId, ref: "PodcastInfo" }],
 });
 

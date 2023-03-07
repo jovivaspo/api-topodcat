@@ -1,21 +1,18 @@
 const { Router } = require("express");
 const userController = require("../controllers/userController");
-const protect = require("../middleware/protect");
+const checkJWT = require("../middleware/check-jwt");
+const checkAdmin = require("../middleware/checkAdmin");
 
 const userRouter = Router();
 
-userRouter.get("/", userController.test);
+userRouter.get("/test", userController.test);
 
-userRouter.get("/all", userController.getAll);
+userRouter.get("/all", [checkJWT, checkAdmin], userController.getAll);
 
-userRouter.post("/register", userController.register);
+userRouter.get("/:id", checkJWT, userController.getUser);
 
-userRouter.post("/login", userController.login);
+userRouter.delete("/:id", checkJWT, userController.deleteUser);
 
-userRouter.get("/:id", userController.getUser);
-
-userRouter.delete("/:id", userController.deleteUser);
-
-userRouter.put("/update/:id", userController.updateUser);
+userRouter.put("/:id", checkJWT, userController.updateUser);
 
 module.exports = userRouter;

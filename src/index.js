@@ -1,7 +1,9 @@
 const app = require("./app");
 const http = require("http");
+const jwt = require("jsonwebtoken");
 const { Server } = require("socket.io");
 const server = http.createServer(app);
+const config = require("./config");
 
 const User = require("./models/User");
 const getAudio = require("./services/getAudio");
@@ -13,21 +15,30 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-/*
+
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
-  if (token) {
-    const res = verifyToken(token);
-    if (res.error) return next(new Error(res.error));
-    socket.decoded = res.decodedToken;
+  if (!token) {
+    return next(new Error("No hay token en la petición"));
+  }
+  try {
+    const { uid, name } = jwt.verify(token, config.KEY_SECRET);
+    if (!uid || !name) {
+      next(new Error("Token inválido"));
+    }
+    socket.uid = uid;
+    socket.name = name;
     next();
+  } catch (error) {
+    console.log(error);
+    next(new Error("Token inválido"));
   }
 });
 
 io.use(async (socket, next) => {
   const duration = socket.handshake.query.duration;
-  const { id } = socket.decoded;
-  const user = await User.findById(id).populate("podcastsList");
+  const { uid } = socket;
+  const user = await User.findById(uid).populate("podcastsList");
   if (!user) {
     next(new Error("Error al buscar el usuario"));
   }
@@ -42,7 +53,7 @@ io.use(async (socket, next) => {
   }
   next();
 }).on("connection", (socket) => {
-  console.log("Usuario conectado: ", socket.decoded.email);
+  console.log("Usuario conectado: ", socket.name);
 
   socket.emit("message_converting", "Convirtiendo video...");
 
@@ -54,7 +65,7 @@ io.use(async (socket, next) => {
     console.log("Usuario desconectado");
   });
 });
-*/
+
 server.listen(app.get("port"), () => {
   console.log(`Server on port ${app.get("port")}`);
 });
